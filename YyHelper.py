@@ -2,16 +2,28 @@
 
 import os
 import time
+import re
 
 class YyHelper:
 
     device = ""
-    device_x = 1920
-    device_y = 1080
-    #sumsung s6 2560 * 1440
+    device_x = 0
+    device_y = 0
+    # Sumsung s6 2560 * 1440
+    # Xiaomi 5 1920 * 1080
 
     def __init__(self, device=""):
         self.device = device
+        self.adb = Adb(device)
+        self.initDeviceResolution()
+
+    def initDeviceResolution(self):
+        '''
+        获取屏幕分辨率
+        '''
+        resolution = self.adb.getResolution()
+        self.device_x = resolution[1]
+        self.device_y = resolution[0]
 
     def startFightForMaterial(self):
         '''
@@ -26,22 +38,22 @@ class YyHelper:
         readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
         finishCoordinate = [self.device_x * finishByPercentage[0], self.device_y * finishByPercentage[1]]
 
-        self.adbSendTouchCmd(challengeBtnCoordinate)
+        self.adb.touch(challengeBtnCoordinate)
         self.sleep(20)
 
-        self.adbSendTouchCmd(readyBtnCoordinate)
+        self.adb.touch(readyBtnCoordinate)
         self.sleep(70)  # wait for fighting
 
-        self.adbSendTouchCmd(finishCoordinate)
+        self.adb.touch(finishCoordinate)
         self.sleep(5)  # wait for showing the pangwawa
-        self.adbSendTouchCmd(finishCoordinate)
+        self.adb.touch(finishCoordinate)
         self.sleep(5)  # gifts come from the pangwawa
-        self.adbSendTouchCmd(finishCoordinate)
+        self.adb.touch(finishCoordinate)
         self.sleep(20)  # quit the fight scenario
 
     def fightForMaterialEndless(self):
         '''
-        点击挑战按钮
+        无尽模式刷御魂和觉醒材料
         :return:
         '''
         challengeBtnByPercentage = [0.75, 0.75]
@@ -53,9 +65,9 @@ class YyHelper:
         finishCoordinate = [self.device_x * finishByPercentage[0], self.device_y * finishByPercentage[1]]
 
         while True:
-            self.adbSendTouchCmd(challengeBtnCoordinate)
-            self.adbSendTouchCmd(readyBtnCoordinate)
-            self.adbSendTouchCmd(finishCoordinate)
+            self.adb.touch(challengeBtnCoordinate)
+            self.adb.touch(readyBtnCoordinate)
+            self.adb.touch(finishCoordinate)
             self.sleep(5)
 
     def startFightForEnchantment(self):
@@ -80,57 +92,39 @@ class YyHelper:
 
             enchantment_x = enchantment_start_x + index_x * interval_x
             enchantment_y = enchantment_start_y + index_y * interval_y
-            self.adbSendTouchCmd([enchantment_x, enchantment_y])
+            self.adb.touch([enchantment_x, enchantment_y])
             # wait for the showing of the challenge btn
             self.sleep(2)
 
             enchantment_attack_x = enchantment_attack_start_x + interval_x * index_x
             enchantment_attack_y = enchantment_attack_start_y + interval_y * index_y
-            self.adbSendTouchCmd([enchantment_attack_x, enchantment_attack_y])
+            self.adb.touch([enchantment_attack_x, enchantment_attack_y])
             # be ready for fighting
             self.sleep(15)
 
-            self.touch_ready_btn()
+            self.touchReadyBtn()
             self.sleep(100)
-            self.end_the_fight_and_sleep()
+            self.endTheFightAndSleep()
 
             if enchantment_index % 3 == 2:
-                self.touch_pangwawa()
+                self.touchPangwawa()
 
-
-    def touch_ready_btn(self):
+    def touchReadyBtn(self):
         ready_btn_coordinate = [2340, 1100]
-        self.adbSendTouchCmd(ready_btn_coordinate)
+        self.adb.touch(ready_btn_coordinate)
 
-
-    def end_the_fight_and_sleep(self):
+    def endTheFightAndSleep(self):
         finish_coordinate = [1300, 750]
-        self.adbSendTouchCmd(finish_coordinate)
+        self.adb.touch(finish_coordinate)
         self.sleep(10)  # wait for showing the pangwawa
-        self.touch_pangwawa()
+        self.touchPangwawa()
 
-
-    def touch_pangwawa(self):
+    def touchPangwawa(self):
         finish_coordinate = [1300, 750]
-        self.adbSendTouchCmd(finish_coordinate)
+        self.adb.touch(finish_coordinate)
         self.sleep(10)  # gifts come from the pangwawa
-        self.adbSendTouchCmd(finish_coordinate)
+        self.adb.touch(finish_coordinate)
         self.sleep(15)  # quit the fight scenario
-
-
-    def adbSendTouchCmd(self, coordinate):
-        print("adb : send touch cmd")
-
-        if self.device == "" or self.device == None:
-            adb_touch_cmd = "adb shell input tap"
-        else:
-            adb_touch_cmd = "adb -s " + str(self.device) + " shell input tap"
-
-        x = str(coordinate[0])
-        y = str(coordinate[1])
-        cmd_to_run = adb_touch_cmd + " " + x + " " + y
-        os.system(cmd_to_run)
-
 
     def sleep(self, seconds, msg=""):
         if msg is not None and msg != "":
@@ -138,6 +132,34 @@ class YyHelper:
         print("sleep : " + str(seconds))
         time.sleep(seconds)
 
+class Adb:
+    def __init__(self, device=""):
+        self.device = device
+        if self.device == "" or self.device == None:
+            self.cmdPrefix = "adb"
+        else:
+            self.cmdPrefix = "adb -s %s" % self.device
+
+    def touch(self, coordinate):
+        print("adb : touch %d,%d" % (coordinate[0], coordinate[1]))
+        cmd = "%s shell input tap %d %d" % (self.cmdPrefix, coordinate[0], coordinate[1])
+        os.system(cmd)
+
+    def getResolution(self):
+        print("adb : get resolution")
+        pattern = re.compile(r'.* (\d+)x(\d+).*')
+        cmd = "%s shell wm size" % self.cmdPrefix
+        proc = os.popen(cmd)
+        output = ''.join(proc.readlines())
+        proc.close()
+        rematch = pattern.match(output)
+        if rematch is not None:
+            resolution = [int(rematch.group(1)), int(rematch.group(2))]
+            print("adb : resolution is %dx%d" % (resolution[0], resolution[1]))
+            return resolution
+        else:
+            print("adb : get reslution failed!\noutput is %s" % output)
+            exit()
 
 def fight_for_material():
     for i in range(0, 100):
@@ -150,8 +172,7 @@ def fight_for_material_endless():
 def fight_for_enchantment():
     YyHelper().startFightForEnchantment()
 
-
 if __name__ == '__main__':
-#     fight_for_material()
+    # fight_for_material()
     fight_for_material_endless()
     # fight_for_enchantment()
