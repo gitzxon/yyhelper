@@ -72,6 +72,22 @@ class YyHelper:
             self.adb.touch(finishCoordinate)
             self.sleep(1)
 
+    def fightWithGroup(self):
+        '''
+        组队刷御魂和觉醒材料时自动接受好友邀请和准备
+        '''
+        acceptInviteBtnByPercentage = [0.588, 0.602]
+        readyBtnByPercentage = [0.90, 0.75]
+
+        acceptInviteBtnCoordinate = [self.device_x * acceptInviteBtnByPercentage[0], self.device_y * acceptInviteBtnByPercentage[1]]
+        readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
+
+        while True:
+            self.adb.touch(readyBtnCoordinate)
+            self.sleep(1)
+            self.adb.touch(acceptInviteBtnCoordinate)
+            self.sleep(1)
+
     def startFightForEnchantment(self):
         enchantment_start_x = 640
         enchantment_start_y = 300
@@ -174,7 +190,11 @@ def fight_for_material_endless():
 def fight_for_enchantment():
     YyHelper().startFightForEnchantment()
 
+def fight_with_group():
+    YyHelper().fightWithGroup()
+
 if __name__ == '__main__':
     # fight_for_material()
     fight_for_material_endless()
-    # fight_for_enchantment()
+#     fight_for_enchantment()
+#     fight_with_group()

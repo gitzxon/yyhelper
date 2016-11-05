@@ -6,6 +6,7 @@ Free yourself from YinYangShi.
 
 - [x] Automatic fight for Yuhun
 - [x] Automatic fight for Juexing Materials
+- [x] Automatic accept invite and ready when fight with group
 
 ## Usage
 
