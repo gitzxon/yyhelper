@@ -66,9 +66,11 @@ class YyHelper:
 
         while True:
             self.adb.touch(challengeBtnCoordinate)
+            self.sleep(1)
             self.adb.touch(readyBtnCoordinate)
+            self.sleep(1)
             self.adb.touch(finishCoordinate)
-            self.sleep(5)
+            self.sleep(1)
 
     def startFightForEnchantment(self):
         enchantment_start_x = 640
