@@ -3,6 +3,8 @@
 import os
 import time
 import re
+import getopt
+import sys
 
 class YyHelper:
 
@@ -30,13 +32,13 @@ class YyHelper:
         点击挑战按钮
         :return:
         '''
-        challengeBtnByPercentage = [0.75, 0.75]
-        readyBtnByPercentage = [0.90, 0.75]
-        finishByPercentage = [0.50, 0.50]
+        challengeBtnPercentage = [0.75, 0.75]
+        readyBtnPercentage = [0.90, 0.75]
+        finishPercentage = [0.50, 0.50]
 
-        challengeBtnCoordinate = [challengeBtnByPercentage[0] * self.device_x, challengeBtnByPercentage[1] * self.device_y]
-        readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
-        finishCoordinate = [self.device_x * finishByPercentage[0], self.device_y * finishByPercentage[1]]
+        challengeBtnCoordinate = [challengeBtnPercentage[0] * self.device_x, challengeBtnPercentage[1] * self.device_y]
+        readyBtnCoordinate = [self.device_x * readyBtnPercentage[0], self.device_y * readyBtnPercentage[1]]
+        finishCoordinate = [self.device_x * finishPercentage[0], self.device_y * finishPercentage[1]]
 
         self.adb.touch(challengeBtnCoordinate)
         self.sleep(20)
@@ -54,39 +56,53 @@ class YyHelper:
     def fightForMaterialEndless(self):
         '''
         无尽模式刷御魂和觉醒材料
-        :return:
         '''
-        challengeBtnByPercentage = [0.75, 0.75]
-        readyBtnByPercentage = [0.90, 0.75]
-        finishByPercentage = [0.50, 0.50]
-
-        challengeBtnCoordinate = [challengeBtnByPercentage[0] * self.device_x, challengeBtnByPercentage[1] * self.device_y]
-        readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
-        finishCoordinate = [self.device_x * finishByPercentage[0], self.device_y * finishByPercentage[1]]
+        challengeBtnPercentage = [0.75, 0.75]
+        readyBtnPercentage = [0.90, 0.75]
+        finishPercentage = [0.50, 0.50]
 
         while True:
-            self.adb.touch(challengeBtnCoordinate)
+            self.touchByPercent(challengeBtnPercentage)
             self.sleep(1)
-            self.adb.touch(readyBtnCoordinate)
+            self.touchByPercent(readyBtnPercentage)
             self.sleep(1)
-            self.adb.touch(finishCoordinate)
+            self.touchByPercent(finishPercentage)
             self.sleep(1)
 
     def fightWithGroup(self):
         '''
         组队刷御魂和觉醒材料时自动接受好友邀请和准备
         '''
-        acceptInviteBtnByPercentage = [0.588, 0.602]
-        readyBtnByPercentage = [0.90, 0.75]
-
-        acceptInviteBtnCoordinate = [self.device_x * acceptInviteBtnByPercentage[0], self.device_y * acceptInviteBtnByPercentage[1]]
-        readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
+        acceptInviteBtnPercentage = [0.588, 0.602]
+        readyBtnPercentage = [0.90, 0.75]
 
         while True:
-            self.adb.touch(readyBtnCoordinate)
+            self.touchByPercent(readyBtnPercentage)
             self.sleep(1)
-            self.adb.touch(acceptInviteBtnCoordinate)
+            self.touchByPercent(acceptInviteBtnPercentage)
             self.sleep(1)
+
+    def fightingSkills(self):
+        '''
+        刷斗技
+        '''
+        fightBtnPercentage = [0.863, 0.811]
+        readyBtnPercentage = [0.90, 0.75]
+        quitBtnPercentage = [0.0296, 0.0439]
+        quitConfirmBtnPercent = [0.582, 0.592]
+
+        while True:
+            self.touchByPercent(fightBtnPercentage)
+            self.sleep(16)
+#             self.touchByPercent(readyBtnPercentage)
+#             self.sleep(20)
+            self.touchByPercent(quitBtnPercentage)
+            self.sleep(1)
+            self.touchByPercent(quitConfirmBtnPercent)
+            self.sleep(1)
+            self.touchByPercent(quitConfirmBtnPercent)
+            self.sleep(5)
+
 
     def startFightForEnchantment(self):
         enchantment_start_x = 640
@@ -126,6 +142,10 @@ class YyHelper:
 
             if enchantment_index % 3 == 2:
                 self.touchPangwawa()
+
+    def touchByPercent(self, coordinatePercentage):
+        coordinate = [self.device_x * coordinatePercentage[0], self.device_y * coordinatePercentage[1]]
+        self.adb.touch(coordinate)
 
     def touchReadyBtn(self):
         ready_btn_coordinate = [2340, 1100]
@@ -184,17 +204,45 @@ def fight_for_material():
         print("------ game : " + str(i + 1) + "------")
         YyHelper().startFightForMaterial()
 
-def fight_for_material_endless():
-    YyHelper().fightForMaterialEndless()
-
 def fight_for_enchantment():
     YyHelper().startFightForEnchantment()
 
-def fight_with_group():
-    YyHelper().fightWithGroup()
+def usage():
+    print("""
+          usage: python YyHelper.py [mode]
+
+          Augument `mode` is optional, default is `--material`.
+
+          Available mode:
+
+          -m | --material      Yuhun or Juexing Materials
+          -s | --skill         Fighting skills
+          -g | --group         Fight for materials with group
+          """)
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "msg", ["material", "skill", "group"])
+    except getopt.GetoptError as err:
+        opts = []
+
+    if len(opts) == 0:
+        usage()
+        opts = [('-m', '')]
+
+    yyhelper = YyHelper()
+
+    for o, a in opts:
+        if o in ("-m", "--material"):
+            print("start fight for materials endless")
+            yyhelper.fightForMaterialEndless()
+        elif o in ("-s", "--skill"):
+            print("start fighting skills")
+            yyhelper.fightingSkills()
+        elif o in ("-g", "--group"):
+            print("start fight for materials with group")
+            yyhelper.fightWithGroup()
+        break
 
 if __name__ == '__main__':
-    # fight_for_material()
-    fight_for_material_endless()
-#     fight_for_enchantment()
-#     fight_with_group()
+    main()
