@@ -7,7 +7,8 @@ Free yourself from YinYangShi.
 - [x] Automatic fight for Yuhun
 - [x] Automatic fight for Juexing Materials
 - [x] Automatic accept invite and ready when fight with group
-- [X] Automatic fighting skills
+- [x] Automatic fighting skills
+- [x] Automatic fight for chapters
 
 ## Usage
 
@@ -40,6 +41,7 @@ Free yourself from YinYangShi.
     | -m or --material | Yuhun or Juexing Materials |
     | -s or --skill    | Fighting skills            |
     | -g or --group    | Materials with group       |
+    | -c or --chapter  | Fight for chapters         |
 
 5. Enjoy it!
 

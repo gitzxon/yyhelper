@@ -5,6 +5,7 @@ import time
 import re
 import getopt
 import sys
+import random
 
 class YyHelper:
 
@@ -103,6 +104,48 @@ class YyHelper:
             self.touchByPercent(quitConfirmBtnPercent)
             self.sleep(5)
 
+    def fightForChapter(self):
+        '''
+        章节 by @zxjay
+        '''
+        enterChapter = [0.9, 0.47]
+        challengeBtnByPercentage = [0.75, 0.75]
+        readyBtnByPercentage = [0.90, 0.75]
+        finishByPercentage = [0.50, 0.50]
+
+
+        enterChapterPos = [enterChapter[0] * self.device_x, enterChapter[1] * self.device_y]
+        challengeBtnCoordinate = [challengeBtnByPercentage[0] * self.device_x, challengeBtnByPercentage[1] * self.device_y]
+        readyBtnCoordinate = [self.device_x * readyBtnByPercentage[0], self.device_y * readyBtnByPercentage[1]]
+        finishCoordinate = [self.device_x * finishByPercentage[0], self.device_y * finishByPercentage[1]]
+
+        #touch chapter
+        self.adb.touch(enterChapterPos)
+        self.sleep(4)
+        #touch challenge btn
+        self.adb.touch(challengeBtnCoordinate)
+        self.sleep(10)
+        for yyp in range(0, 4):
+            walkPos = [yyp * 0.25 * self.device_x, 0.757 * self.device_y]
+            self.adb.touch(walkPos)
+            self.sleep(1)
+
+            for num in range(1, 14):
+                itemPos = [num * 0.06611 * self.device_x * random.uniform(0.95, 1.05), 0.558 * self.device_y * random.uniform(0.95, 1.05)]
+                self.adb.touch(itemPos)
+                #self.sleep(0.2)
+                itemPos = [num * 0.06611 * self.device_x * random.uniform(0.95, 1.05), 0.338 * self.device_y * random.uniform(0.95, 1.05)]
+                self.adb.touch(itemPos)
+                #self.sleep(0.2)
+                itemPos = [num * 0.06611 * self.device_x * random.uniform(0.95, 1.05), 0.457 * self.device_y * random.uniform(0.95, 1.05)]
+                self.adb.touch(itemPos)
+                self.sleep(1)
+
+        self.adb.touch(readyBtnCoordinate)
+
+    def fightForChapterEndless(self):
+        while True:
+            self.fightForChapter()
 
     def startFightForEnchantment(self):
         enchantment_start_x = 640
@@ -218,11 +261,12 @@ def usage():
           -m | --material      Yuhun or Juexing Materials
           -s | --skill         Fighting skills
           -g | --group         Fight for materials with group
+          -c | --chapter       Fight for chapters
           """)
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "msg", ["material", "skill", "group"])
+        opts, args = getopt.getopt(sys.argv[1:], "msgc", ["material", "skill", "group", "chapter"])
     except getopt.GetoptError as err:
         opts = []
 
@@ -242,6 +286,9 @@ def main():
         elif o in ("-g", "--group"):
             print("start fight for materials with group")
             yyhelper.fightWithGroup()
+        elif o in ("-c", "--chapter"):
+            print("start fight for chapters")
+            yyhelper.fightForChapterEndless()
         break
 
 if __name__ == '__main__':
