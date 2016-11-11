@@ -25,6 +25,8 @@ class YysHelper():
             if ret:
                 self.sleep(8)
 
+            ret = self.clickImage("lock.1920x1080.png", time=5)
+
             while True:
                 swordExists = True
                 while True:
