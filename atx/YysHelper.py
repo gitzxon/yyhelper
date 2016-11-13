@@ -230,8 +230,6 @@ class YysHelper:
                             print(" fighting ")
                             break
 
-
-
     def fight_with_enemy_inside_dungeon(self):
         '''
         点击 FindPoint ，开始战斗。
