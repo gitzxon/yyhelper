@@ -11,8 +11,11 @@ class YysHelper:
     image_name_of_normal_enemy_sword = "sword.1920x1080.png"
     image_name_of_leader_enemy_sword = "leader_sword.1920x1080.png"
     image_name_of_gift = "fresh.1920x1080.png"
-    image_name_of_gift_received = "gift_received.1920x1080.1920x1080.png"
+    image_name_of_gift_received = "gift_received.1920x1080.png"
     image_name_of_explore = "btn_explore.1920x1080.png"
+    image_name_of_automatic = "automatic.1920x1080.png"
+    image_name_of_back_to_map_of_world = "back_to_map_of_world.1920x1080.png"
+    image_name_of_left_bottom_menu = "left_bottom_menu.1920x1080.png"
 
     def __init__(self):
         self.d = atx.connect()
@@ -109,17 +112,28 @@ class YysHelper:
 
     def dungeon(self):
 
-        # show dungeon detail
-        x_by_percentage = 0.93
-        y_by_percentage = 0.66
-        self.touch_by_percentage(x_by_percentage, y_by_percentage)
-        self.sleep(3)
+        is_exploration_finished = True
+        while True:
+            if is_exploration_finished:
 
-        # click btn explore
-        self.click_img_until_success(self.image_name_of_explore)
-        self.sleep(3)
+                # todo : click the chest
 
-        self.inside_dungeon()
+                is_exploration_finished = False
+
+                # show dungeon detail
+                x_by_percentage = 0.93
+                y_by_percentage = 0.66
+                self.touch_by_percentage(x_by_percentage, y_by_percentage)
+                self.sleep(3)
+
+                # click btn explore
+                self.click_img_until_success(self.image_name_of_explore)
+                self.sleep(3)
+
+                is_exploration_finished = self.inside_dungeon_mechanically()
+            else:
+                # just wait for finishing the exploration
+                continue
 
     def inside_dungeon(self):
 
@@ -146,6 +160,77 @@ class YysHelper:
                 if result_click_normal is None:
                     # 屏幕中没有怪了，右滑屏幕
                     self.swipe_by_percentage(0.75, 0.5, 0.25, 0.5)
+
+    def inside_dungeon_mechanically(self):
+        is_leader_shown = False
+        while True:
+
+            # 优先点击“点击继续”
+            print("find and click continue")
+            result_for_continue = self.d.click_nowait(self.image_name_of_continue)
+            if result_for_continue is not None:
+                continue
+
+            print("find and click leader")
+            result_leader = self.d.click_nowait(self.image_name_of_leader_enemy_sword)
+            if result_leader is not None:
+                is_leader_shown = True
+
+            print("find and click gift")
+            if is_leader_shown:
+                self.d.click_nowait(self.image_name_of_gift)
+                result_for_gift_received = self.d.click_nowait(self.image_name_of_gift_received)
+                self.sleep(2, " find and click 获得奖励 ")
+                if result_for_gift_received:
+                    self.touch_by_percentage(0.50, 0.75)
+
+                world_map_find_point = self.d.exists(self.image_name_of_left_bottom_menu)
+                if world_map_find_point is None:
+                    continue
+                else:
+                    return True
+
+            else:
+                print("check is fighting")
+                back_find_point = self.d.exists(self.image_name_of_back_to_map_of_world)
+                if back_find_point is None:
+                    is_fighting_with_normal = True
+                    print(" fighting ")
+                else:
+                    is_fighting_with_normal = False
+                    print(" not fighting ")
+
+                if is_fighting_with_normal:
+                    continue
+                else:
+                    '''
+                    Z字型 find and click 普通怪
+                    '''
+                    width = self.d.display.height
+                    height = self.d.display.width
+                    x_step = 50
+                    y_step = 50
+                    while True:
+                        self.d.click(width / 2 + x_step, height / 2)
+                        self.sleep(2, msg="moving the Onmyoji")
+                        # 避开上面的 toast
+                        y_max = height * 0.80
+                        y_min = height * 0.17
+                        y_current = y_min
+
+                        while y_current < y_max:
+                            self.d.click(width / 2, y_current)
+                            y_current = y_current + y_step
+                        while y_current > y_min:
+                            self.d.click(width / 2, y_current)
+                            y_current = y_current - y_step
+
+                        back_find_point = self.d.exists(self.image_name_of_back_to_map_of_world)
+                        if back_find_point is None:
+                            print(" fighting ")
+                            break
+
+
 
     def fight_with_enemy_inside_dungeon(self):
         '''
