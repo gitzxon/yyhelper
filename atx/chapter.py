@@ -27,10 +27,16 @@ class YysHelper():
 
             ret = self.clickImage("lock.1920x1080.png", time=5)
 
+            fightedWithLeader = False
+
             while True:
                 swordExists = True
                 while True:
                     ret = self.clickImage("sword.1920x1080.png")
+                    if not ret:
+                        ret = self.clickImage("leader_sword.1920x1080.png", time=5)
+                        fightedWithLeader = ret
+
                     if ret:
                         self.sleep(10)
                         ret = self.d.exists("friend.1920x1080.png")
@@ -55,6 +61,13 @@ class YysHelper():
 
                 if ret:
                     self.sleep(7)
+
+            while fightedWithLeader:
+                ret = self.clickImage("fresh.1920x1080.png")
+                if ret:
+                    self.clickImage("back.1920x1080.png")
+                else:
+                    break
 
             ret = self.clickImage("back.1920x1080.png")
 
