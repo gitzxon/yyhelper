@@ -47,11 +47,11 @@ class YysHelper():
                     count = 0
                     while True:
                         ret = self.clickImage("click_to_continue.1920x1080.png")
-                        if ret:
+                        if not ret:
+                            if count >= 3:
+                                break
+                        else:
                             count += 1
-
-                        if count == 3:
-                            break
 
                 if ret:
                     self.sleep(7)
