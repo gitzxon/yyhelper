@@ -29,7 +29,7 @@ class YysHelper():
 
             fightedWithLeader = False
 
-            while True:
+            while not fightedWithLeader:
                 swordExists = True
                 while True:
                     ret = self.clickImage("sword.1920x1080.png")
@@ -55,12 +55,10 @@ class YysHelper():
                         ret = self.clickImage("click_to_continue.1920x1080.png")
                         if not ret:
                             if count >= 3:
+                                self.sleep(7)
                                 break
                         else:
                             count += 1
-
-                if ret:
-                    self.sleep(7)
 
             while fightedWithLeader:
                 ret = self.clickImage("fresh.1920x1080.png")
