@@ -36,12 +36,12 @@ class YysHelper():
                 while True:
                     ret = self.clickImage("sword.1920x1080.png")
                     if not ret:
-                        ret = self.clickImage("leader_sword.1920x1080.png", time=5)
+                        ret = self.clickImageNoWait("leader_sword.1920x1080.png")
                         fightedWithLeader = ret
 
                     if ret:
-                        self.sleep(10)
-                        ret = self.d.exists("friend.1920x1080.png")
+                        self.sleep(15)
+                        ret = self.checkImageExists("friend.1920x1080.png")
                         if ret:
                             break
                     else:
@@ -51,16 +51,15 @@ class YysHelper():
                 if not swordExists:
                     break
 
-                if ret:
-                    count = 0
-                    while True:
-                        ret = self.clickImage("click_to_continue.1920x1080.png")
-                        if not ret:
-                            if count >= 3:
-                                self.sleep(7)
-                                break
-                        else:
-                            count += 1
+                count = 0
+                while True:
+                    ret = self.clickImage("click_to_continue.1920x1080.png")
+                    if not ret:
+                        if count >= 3:
+                            self.sleep(10)
+                            break
+                    else:
+                        count += 1
 
             if fightedWithLeader:
                 while True:
@@ -77,7 +76,7 @@ class YysHelper():
                     self.sleep(2)
                     ret = self.clickImage("chapter_quit_confirm.1920x1080.png")
                     if ret:
-                        self.sleep(7)
+                        self.sleep(10)
 
     def clickImage(self, image, time=10):
         try:
@@ -85,6 +84,23 @@ class YysHelper():
             return True
         except atx.ImageNotFoundError:
             print('%s button not found' % image)
+            return False
+
+    def clickImageNoWait(self, image):
+        ret = self.d.click_nowait(image)
+        if ret is not None:
+            return True
+        else:
+            print('%s button not found' % image)
+            return False
+
+    def checkImageExists(self, image):
+        ret = self.d.exists("friend.1920x1080.png")
+        if ret is not None:
+            print('%s exists' % image)
+            return True
+        else:
+            print('%s not exists' % image)
             return False
 
     def sleep(self, seconds, msg=""):
