@@ -2,6 +2,8 @@
 
 import atx
 import time
+import getopt
+import sys
 
 class YysHelper():
     def __init__(self):
@@ -13,7 +15,7 @@ class YysHelper():
         章节循环一轮游，进章节把屏幕内的小怪打完就出来
         """
         while True:
-            chapterImage = "chapter%d.1920x1080.png" % level
+            chapterImage = "chapter%s.1920x1080.png" % level
 
             ret = self.clickImage(chapterImage)
 
@@ -91,8 +93,34 @@ class YysHelper():
         print("sleep : " + str(seconds))
         time.sleep(seconds)
 
+def usage():
+    print("""
+          usage: python chapter.py -c <num>
+
+          Augument `num` is the chapter count you want to fight.
+
+          Available:
+
+          -c num | --chapter=num    Fight for chapter num
+          """)
+
 def main():
-    YysHelper().chapter(13)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "c:", ["chapter="])
+    except getopt.GetoptError as err:
+        opts = []
+
+    if len(opts) == 0:
+        usage()
+        opts = [('-c', '13')]
+
+    yyshelper = YysHelper()
+
+    for o, a in opts:
+        if o in ("-c", "--chapter"):
+            print("start fight for chapters %s" % a)
+            yyshelper.chapter(a)
+        break
 
 if __name__ == '__main__':
     main()
