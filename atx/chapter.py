@@ -60,20 +60,22 @@ class YysHelper():
                         else:
                             count += 1
 
-            while fightedWithLeader:
-                ret = self.clickImage("fresh.1920x1080.png")
-                if ret:
-                    self.clickImage("back.1920x1080.png")
-                else:
-                    break
+            if fightedWithLeader:
+                while True:
+                    ret = self.clickImage("fresh.1920x1080.png")
+                    if ret:
+                        self.clickImage("back.1920x1080.png")
+                    else:
+                        self.sleep(7)
+                        break
+            else:
+                ret = self.clickImage("back.1920x1080.png")
 
-            ret = self.clickImage("back.1920x1080.png")
-
-            if ret:
-                self.sleep(2)
-                ret = self.clickImage("chapter_quit_confirm.1920x1080.png")
                 if ret:
-                    self.sleep(7)
+                    self.sleep(2)
+                    ret = self.clickImage("chapter_quit_confirm.1920x1080.png")
+                    if ret:
+                        self.sleep(7)
 
     def clickImage(self, image, time=10):
         try:
