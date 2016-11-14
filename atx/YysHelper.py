@@ -101,13 +101,16 @@ class YysHelper:
                     self.fight_with_enemy_inside_dungeon()
                 else:
                     is_leader_shown = False
+                    print("find and click normal enemy")
                     result_for_find_normal_enemy = self.d.click_nowait(self.image_name_of_normal_enemy_sword)
                     if result_for_find_normal_enemy is not None:
+                        print("successed")
                         self.fight_with_enemy_inside_dungeon()
                         continue
                     else:
+                        print("failed")
                         # 没有首领，也没有普通怪，则滑动屏幕。
-                        self.d.swipe(0.75, 0.50, 0.25, 0.50)
+                        self.swipe_by_percentage(0.75, 0.50, 0.25, 0.50)
                         continue
 
     def dungeon(self):
@@ -179,8 +182,8 @@ class YysHelper:
             print("find and click gift")
             if is_leader_shown:
                 self.d.click_nowait(self.image_name_of_gift)
+                self.sleep(2, " after clicking the gift ")
                 result_for_gift_received = self.d.click_nowait(self.image_name_of_gift_received)
-                self.sleep(2, " find and click 获得奖励 ")
                 if result_for_gift_received:
                     self.touch_by_percentage(0.50, 0.75)
 
@@ -212,15 +215,18 @@ class YysHelper:
                     y_step = 50
                     while True:
                         self.d.click(width / 2 + x_step, height / 2)
-                        self.sleep(2, msg="moving the Onmyoji")
+                        self.sleep(0.2, msg="moving the Onmyoji")
                         # 避开上面的 toast
                         y_max = height * 0.80
                         y_min = height * 0.17
                         y_current = y_min
 
+                        print("click vertical line down")
                         while y_current < y_max:
                             self.d.click(width / 2, y_current)
                             y_current = y_current + y_step
+
+                        print("click vertical line up")
                         while y_current > y_min:
                             self.d.click(width / 2, y_current)
                             y_current = y_current - y_step
