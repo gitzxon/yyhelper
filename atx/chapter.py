@@ -12,7 +12,7 @@ class YysHelper():
 
     def chapter(self, level):
         """
-        章节循环一轮游，进章节把屏幕内的小怪打完就出来
+        章节，level 表示第几章
         """
         while True:
             chapterImage = "chapter%s.1920x1080.png" % level
@@ -32,8 +32,8 @@ class YysHelper():
             fightedWithLeader = False
 
             while not fightedWithLeader:
-                swordExists = True
-                while True:
+                swipeCount = 0
+                while swipeCount < 3:
                     ret = self.clickImage("sword.1920x1080.png")
                     if not ret:
                         ret = self.clickImageNoWait("leader_sword.1920x1080.png")
@@ -45,10 +45,11 @@ class YysHelper():
                         if ret:
                             break
                     else:
-                        swordExists = False
-                        break
+                        self.swipe(0.78, 0.25)
+                        swipeCount += 1
+                        continue
 
-                if not swordExists:
+                if swipeCount >= 3:
                     break
 
                 count = 0
@@ -56,7 +57,7 @@ class YysHelper():
                     ret = self.clickImage("click_to_continue.1920x1080.png")
                     if not ret:
                         if count >= 3:
-                            self.sleep(10)
+                            self.sleep(7)
                             break
                     else:
                         count += 1
@@ -102,6 +103,16 @@ class YysHelper():
         else:
             print('%s not exists' % image)
             return False
+
+    def swipe(self, startX, endX):
+        '''
+        入参为百分比
+        '''
+        x1 = self.d.display.height * startX
+        y1 = self.d.display.width * 0.5
+        x2 = self.d.display.height * endX
+        y2 = self.d.display.width * 0.5
+        self.d.swipe(x1, y1, x2, y2, steps=20)
 
     def sleep(self, seconds, msg=""):
         if msg is not None and msg != "":
