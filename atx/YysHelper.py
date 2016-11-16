@@ -70,7 +70,7 @@ class YysHelper:
                 x_by_percentage = 0.93
                 y_by_percentage = 0.66
                 self.touch_by_percentage(x_by_percentage, y_by_percentage)
-                self.sleep(3 + "waiting for the dungeon detail to show")
+                self.sleep(3, "waiting for the dungeon detail to show")
 
                 # click btn explore
                 result_for_clicking_explore_btn = self.find_and_click_img(self.image_name_of_explore)
