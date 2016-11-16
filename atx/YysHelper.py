@@ -5,6 +5,7 @@ import time
 
 
 class YysHelper:
+
     image_name_of_challenge = "challenge.1920x1080.png"
     image_name_of_continue = "click_to_continue.1920x1080.png"
     image_name_of_ready = "ready.1920x1080.png"
@@ -26,7 +27,7 @@ class YysHelper:
             while True:
                 ret = self.challenge()
                 if not ret:
-                    self.touchToContinue()
+                    self.touch_to_continue()
                     self.sleep(5)
                     continue
                 break
@@ -37,7 +38,7 @@ class YysHelper:
                 self.sleep(10)
                 ret = self.ready()
                 if not ret:
-                    self.touchToContinue()
+                    self.touch_to_continue()
                     self.sleep(5)
                     continue
                 break
@@ -46,72 +47,14 @@ class YysHelper:
 
             count = 0
             while True:
-                ret = self.clickToContinue()
+                ret = self.click_to_continue()
                 if not ret:
-                    self.touchToContinue()
+                    self.touch_to_continue()
                     self.sleep(20)
                     continue
                 count += 1
                 if count >= 3:
                     break
-
-    def dungeon2(self):
-        '''
-        探索副本。
-        by default :
-        点击副本列表最后一个可见的 item 的中心。
-        如果想换副本刷的话，可以上下滚动目标副本到副本列表最后一个可见的 item
-        :return:
-        '''
-
-        # show dungeon detail
-        x_by_percentage = 0.93
-        y_by_percentage = 0.66
-        self.touch_by_percentage(x_by_percentage, y_by_percentage)
-        self.sleep(3)
-
-        # click btn explore
-        self.click_img_until_success(self.image_name_of_explore)
-        self.sleep(3)
-
-        # inside dungeon
-        is_leader_shown = False
-        while True:
-            if is_leader_shown is True:
-                # 首领打完，开始收礼物
-                while True:
-                    result_for_click_gift = self.d.click_nowait(self.image_name_of_gift)
-                    if result_for_click_gift is not None:
-                        self.sleep(2)
-                        self.touch_by_percentage(0.5, 0.5)
-                        self.sleep(1)
-                    else:
-                        # 所有小纸人礼物已经收完
-                        # 自动退回大地图界面。
-                        # 大地图界面中可能会有 宝箱 或者 妖气发现 或者 章鱼
-                        # 暂时只处理宝箱
-                        # todo : 这里需要截一下宝箱的图 chest
-                        return
-            else:
-                # 首领没打
-                result_for_click_leader = self.d.click_nowait(self.image_name_of_leader_enemy_sword)
-
-                if result_for_click_leader is not None:
-                    is_leader_shown = True
-                    self.fight_with_enemy_inside_dungeon()
-                else:
-                    is_leader_shown = False
-                    print("find and click normal enemy")
-                    result_for_find_normal_enemy = self.d.click_nowait(self.image_name_of_normal_enemy_sword)
-                    if result_for_find_normal_enemy is not None:
-                        print("successed")
-                        self.fight_with_enemy_inside_dungeon()
-                        continue
-                    else:
-                        print("failed")
-                        # 没有首领，也没有普通怪，则滑动屏幕。
-                        self.swipe_by_percentage(0.75, 0.50, 0.25, 0.50)
-                        continue
 
     def dungeon(self):
 
@@ -119,50 +62,32 @@ class YysHelper:
         while True:
             if is_exploration_finished:
 
-                # todo : click the chest
+                self.sleep(2)
 
-                is_exploration_finished = False
+                # todo : click the chest
 
                 # show dungeon detail
                 x_by_percentage = 0.93
                 y_by_percentage = 0.66
                 self.touch_by_percentage(x_by_percentage, y_by_percentage)
-                self.sleep(3)
+                self.sleep(3 + "waiting for the dungeon detail to show")
 
                 # click btn explore
-                self.click_img_until_success(self.image_name_of_explore)
-                self.sleep(3)
+                result_for_clicking_explore_btn = self.find_and_click_img(self.image_name_of_explore)
+                # 用是否能看见大地图的菜单来判断是否在副本中，而不是用是否点击成功 explore
+                # 这样可以副本中途开脚本而不影响逻辑。
+                map_of_world_find_point = self.d.exists(self.image_name_of_left_bottom_menu)
+                if map_of_world_find_point is None:
+                    self.sleep(3)
+                    is_exploration_finished = False
+                    is_exploration_finished = self.inside_dungeon_mechanically()
+                else:
+                    # 可能因为从副本内出来耗时间过长，
+                    continue
 
-                is_exploration_finished = self.inside_dungeon_mechanically()
             else:
                 # just wait for finishing the exploration
                 continue
-
-    def inside_dungeon(self):
-
-        is_leader_shown = False
-        while True:
-
-            # 优先点击“点击继续”
-            result_for_continue = self.d.click_nowait(self.image_name_of_continue)
-            if result_for_continue is not None:
-                continue
-
-            result_leader = self.d.click_nowait(self.image_name_of_leader_enemy_sword)
-            if result_leader is not None:
-                is_leader_shown = True
-
-            if is_leader_shown:
-                self.d.click_nowait(self.image_name_of_gift)
-                result_for_gift_received = self.d.click_nowait(self.image_name_of_gift_received)
-                if result_for_gift_received:
-                    self.touch_by_percentage(0.50, 0.75)
-
-            else:
-                result_click_normal = self.d.click_nowait(self.image_name_of_normal_enemy_sword)
-                if result_click_normal is None:
-                    # 屏幕中没有怪了，右滑屏幕
-                    self.swipe_by_percentage(0.75, 0.5, 0.25, 0.5)
 
     def inside_dungeon_mechanically(self):
         is_leader_shown = False
@@ -185,7 +110,7 @@ class YysHelper:
                 self.sleep(2, " after clicking the gift ")
                 result_for_gift_received = self.d.click_nowait(self.image_name_of_gift_received)
                 if result_for_gift_received:
-                    self.touch_by_percentage(0.50, 0.75)
+                    self.touch_by_percentage(0.50, 0.75) # 随机点击一个区域以继续
 
                 world_map_find_point = self.d.exists(self.image_name_of_left_bottom_menu)
                 if world_map_find_point is None:
@@ -206,64 +131,26 @@ class YysHelper:
                 if is_fighting_with_normal:
                     continue
                 else:
-                    '''
-                    Z字型 find and click 普通怪
-                    '''
-                    width = self.d.display.height
-                    height = self.d.display.width
-                    x_step = 50
-                    y_step = 50
-                    while True:
-                        self.d.click(width / 2 + x_step, height / 2)
-                        self.sleep(0.2, msg="moving the Onmyoji")
-                        # 避开上面的 toast
-                        y_max = height * 0.80
-                        y_min = height * 0.17
-                        y_current = y_min
-
-                        print("click vertical line down")
-                        while y_current < y_max:
-                            self.d.click(width / 2, y_current)
-                            y_current = y_current + y_step
-
-                        print("click vertical line up")
-                        while y_current > y_min:
-                            self.d.click(width / 2, y_current)
-                            y_current = y_current - y_step
-
-                        back_find_point = self.d.exists(self.image_name_of_back_to_map_of_world)
-                        if back_find_point is None:
-                            print(" fighting ")
-                            break
-
-    def fight_with_enemy_inside_dungeon(self):
-        '''
-        点击 FindPoint ，开始战斗。
-        游戏在探索副本中会自动准备。
-        只需要等待结束画面就可以了
-        :param find_point:
-        :return:
-        '''
-        # scene for the ending fo the fight
-        self.click_img_until_success(self.image_name_of_continue)
-        self.sleep(2)
-        self.click_img_until_success(self.image_name_of_continue)
-        self.sleep(2)
-        self.click_img_until_success(self.image_name_of_continue)
-        self.sleep(2)
+                    result_for_clicking_normal_enemy = self.find_and_click_img(self.image_name_of_normal_enemy_sword)
+                    if result_for_clicking_normal_enemy:
+                        # 画面中有 normal_enemy 但是不一定点击上了。
+                        continue
+                    else:
+                        # find normal enemy failed. swipe
+                        self.swipe_by_percentage(0.50, 0.50, 0.25, 0.5)
 
     def ready(self):
-        return self.clickImage('ready.1920x1080.png')
+        return self.click_image('ready.1920x1080.png')
 
     def challenge(self):
-        return self.clickImage('challenge.1920x1080.png')
+        return self.click_image('challenge.1920x1080.png')
 
-    def clickToContinue(self):
-        return self.clickImage('click_to_continue.1920x1080.png')
+    def click_to_continue(self):
+        return self.click_image('click_to_continue.1920x1080.png')
 
-    def clickImage(self, image, time=10):
+    def click_image(self, image, timeout=10):
         try:
-            self.d.click_image(image, timeout=time)
+            self.d.click_image(image, timeout=timeout)
             return True
         except atx.ImageNotFoundError:
             print('%s button not found' % image)
@@ -274,6 +161,12 @@ class YysHelper:
             self.sleep(3)
 
     def find_and_click_img(self, image_name):
+        '''
+        True : find the img success
+        False : find the img failed
+        :param image_name:
+        :return:
+        '''
         print("start to find the img : " + image_name)
         result = self.d.click_nowait(image_name)
         if result is not None:
@@ -283,24 +176,13 @@ class YysHelper:
             print('%s button not found' % image_name)
             return False
 
-    def find_and_click_randomly(self, image_name):
-        find_point = self.d.exists(image_name, threshold=0.7)
-        if find_point is not None:
-            print(find_point.pos[0] + " | " + find_point.pos[1])
-            self.d.click(find_point.pos[0], find_point.pos[1])
-            self.d.click(find_point.pos[0] - 50, find_point.pos[1])
-            self.d.click(find_point.pos[0] + 50, find_point.pos[1])
-            return True
-        else:
-            return False
-
     def sleep(self, seconds, msg=""):
         if msg is not None and msg != "":
             print("sleep for " + msg)
         print("sleep : " + str(seconds))
         time.sleep(seconds)
 
-    def touchToContinue(self):
+    def touch_to_continue(self):
         self.d.click(200, 400)
 
     def touch_by_percentage(self, x_percentage, y_percentage):
@@ -323,7 +205,6 @@ class YysHelper:
 
 
 def main():
-    # YysHelper().yuhun()
     YysHelper().dungeon()
 
 
