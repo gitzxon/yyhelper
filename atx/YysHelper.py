@@ -2,23 +2,28 @@
 
 import atx
 import time
+import getopt
+import sys
 
 
 class YysHelper:
-
-    image_name_of_challenge = "challenge.1920x1080.png"
-    image_name_of_continue = "click_to_continue.1920x1080.png"
-    image_name_of_ready = "ready.1920x1080.png"
-    image_name_of_normal_enemy_sword = "sword.1920x1080.png"
-    image_name_of_leader_enemy_sword = "leader_sword.1920x1080.png"
-    image_name_of_gift = "fresh.1920x1080.png"
-    image_name_of_gift_received = "gift_received.1920x1080.png"
-    image_name_of_explore = "btn_explore.1920x1080.png"
-    image_name_of_automatic = "automatic.1920x1080.png"
-    image_name_of_back_to_map_of_world = "back_to_map_of_world.1920x1080.png"
-    image_name_of_left_bottom_menu = "left_bottom_menu.1920x1080.png"
-
     def __init__(self):
+
+        # init image names
+        self.image_name_of_back_to_map_of_world = "back_to_map_of_world.1920x1080.png"
+        self.image_name_of_automatic = "automatic.1920x1080.png"
+        self.image_name_of_challenge = "challenge.1920x1080.png"
+        self.image_name_of_continue = "click_to_continue.1920x1080.png"
+        self.image_name_of_ready = "ready.1920x1080.png"
+        self.image_name_of_normal_enemy_sword = "sword.1920x1080.png"
+        self.image_name_of_leader_enemy_sword = "leader_sword.1920x1080.png"
+        self.image_name_of_gift = "fresh.1920x1080.png"
+        self.image_name_of_gift_received = "gift_received.1920x1080.png"
+        self.image_name_of_explore = "btn_explore.1920x1080.png"
+        self.image_name_of_left_bottom_menu = "left_bottom_menu.1920x1080.png"
+        self.image_name_of_chapter = "chapter7.1920x1080.png"
+        self.target_chapter_name = None
+
         self.d = atx.connect()
         self.d.image_path = ['.', 'assets']
 
@@ -56,7 +61,7 @@ class YysHelper:
                 if count >= 3:
                     break
 
-    def dungeon(self):
+    def chapter(self):
 
         is_exploration_finished = True
         while True:
@@ -66,11 +71,8 @@ class YysHelper:
 
                 # todo : click the chest
 
-                # show dungeon detail
-                x_by_percentage = 0.93
-                y_by_percentage = 0.66
-                self.touch_by_percentage(x_by_percentage, y_by_percentage)
-                self.sleep(3, "waiting for the dungeon detail to show")
+                self.click_target_chapter()
+                self.sleep(3, "waiting for the chapter detail to show")
 
                 # click btn explore
                 result_for_clicking_explore_btn = self.find_and_click_img(self.image_name_of_explore)
@@ -80,7 +82,7 @@ class YysHelper:
                 if map_of_world_find_point is None:
                     self.sleep(3)
                     is_exploration_finished = False
-                    is_exploration_finished = self.inside_dungeon_mechanically()
+                    is_exploration_finished = self.inside_chapter_mechanically()
                 else:
                     # 可能因为从副本内出来耗时间过长，
                     continue
@@ -89,7 +91,24 @@ class YysHelper:
                 # just wait for finishing the exploration
                 continue
 
-    def inside_dungeon_mechanically(self):
+    def click_target_chapter(self):
+        if self.target_chapter_name is None:
+            # show chapter detail
+            x_by_percentage = 0.93
+            y_by_percentage = 0.66
+            self.touch_by_percentage(x_by_percentage, y_by_percentage)
+        else:
+            while True:
+                # 这里 threshold 一定要高一点。
+                print("start to find the image with name %s" % self.target_chapter_name)
+                find_pointer = self.d.exists(self.target_chapter_name, threshold=0.95)
+                if find_pointer is None:
+                    self.swipe_by_percentage(0.93, 0.34, 0.93, 0.69)
+                else:
+                    self.d.click(find_pointer.pos[0], find_pointer.pos[1])
+                    break
+
+    def inside_chapter_mechanically(self):
         is_leader_shown = False
         while True:
 
@@ -110,7 +129,7 @@ class YysHelper:
                 self.sleep(2, " after clicking the gift ")
                 result_for_gift_received = self.d.click_nowait(self.image_name_of_gift_received)
                 if result_for_gift_received:
-                    self.touch_by_percentage(0.50, 0.75) # 随机点击一个区域以继续
+                    self.touch_by_percentage(0.50, 0.75)  # 随机点击一个区域以继续
 
                 world_map_find_point = self.d.exists(self.image_name_of_left_bottom_menu)
                 if world_map_find_point is None:
@@ -204,8 +223,36 @@ class YysHelper:
         self.d.swipe(start_x, start_y, end_x, end_y, steps=20)
 
 
+def usage():
+    print("""
+          usage: python chapter.py -c <num>
+
+          Augument `num` is the chapter count you want to fight.
+
+          Available:
+
+          -c num | --chapter=num    Fight for chapter num
+          """)
+
+
 def main():
-    YysHelper().dungeon()
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "c:", ["chapter="])
+    except getopt.GetoptError as err:
+        opts = []
+
+    if len(opts) == 0:
+        usage()
+        opts = [('-c', '7')]
+
+    yyshelper = YysHelper()
+
+    for opt, arg in opts:
+        if opt in ("-c", "--chapter"):
+            print("start fight for chapters %s" % arg)
+            yyshelper.target_chapter_name = "chapter%s.1920x1080.png" % arg
+            yyshelper.chapter()
+        break
 
 
 if __name__ == '__main__':
