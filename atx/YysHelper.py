@@ -21,6 +21,7 @@ class YysHelper:
         self.image_name_of_gift_received = "gift_received.1920x1080.png"
         self.image_name_of_explore = "btn_explore.1920x1080.png"
         self.image_name_of_left_bottom_menu = "left_bottom_menu.1920x1080.png"
+        self.image_name_of_chest = "chest.1920x1080.png"
         self.image_name_of_chapter = "chapter7.1920x1080.png"
         self.target_chapter_name = None
 
@@ -69,7 +70,23 @@ class YysHelper:
 
                 self.sleep(2)
 
-                # todo : click the chest
+
+                # todo : test the chest
+                chest_find_point = self.d.exists(self.image_name_of_chest)
+                if chest_find_point is not None:
+                    self.d.click(chest_find_point.pos[0], chest_find_point.pos[1])
+                    self.sleep(2, msg="clicking the chest")
+
+                    # 只要有宝箱，就点
+                    while True:
+                        continue_find_point = self.d.exists(self.image_name_of_continue)
+                        if continue_find_point is None:
+                            break
+                        else:
+                            self.d.click(continue_find_point.pos[0], continue_find_point.pos[1])
+
+                    # 这个宝箱及其附属礼物点击完毕
+                    continue
 
                 self.click_target_chapter()
                 self.sleep(3, "waiting for the chapter detail to show")
@@ -119,7 +136,7 @@ class YysHelper:
                 continue
 
             print("find and click leader")
-            result_leader = self.d.click_nowait(self.image_name_of_leader_enemy_sword)
+            result_leader = self.d.click_nowait(self.image_name_of_leader_enemy_sword, threshold=0.95)
             if result_leader is not None:
                 is_leader_shown = True
 
