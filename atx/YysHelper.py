@@ -27,40 +27,6 @@ class YysHelper:
         self.d = atx.connect()
         self.d.image_path = ['.', 'assets']
 
-    def yuhun(self):
-        while True:
-            while True:
-                ret = self.challenge()
-                if not ret:
-                    self.touch_to_continue()
-                    self.sleep(5)
-                    continue
-                break
-
-            self.sleep(3)
-
-            while True:
-                self.sleep(10)
-                ret = self.ready()
-                if not ret:
-                    self.touch_to_continue()
-                    self.sleep(5)
-                    continue
-                break
-
-            self.sleep(20)
-
-            count = 0
-            while True:
-                ret = self.click_to_continue()
-                if not ret:
-                    self.touch_to_continue()
-                    self.sleep(20)
-                    continue
-                count += 1
-                if count >= 3:
-                    break
-
     def chapter(self):
 
         is_exploration_finished = True
