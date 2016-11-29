@@ -43,6 +43,16 @@ Free yourself from YinYangShi.
     | -g or --group    | Materials with group       |
     | -c or --chapter  | Fight for chapters         |
 
-5. Enjoy it!
+5. For the case of fighting inside chapter, we strongly recommended you to use the script under the `atx` directory.
+
+    In short, we use the atx framework for image recognizing. 
+
+    To use it, firstly you should install the atx. See details [here][2].  
+    Then, you should go to the `atx` directory by sending command in your terminal like `cd ~/yyhelper/atx`.  
+    Finally, you can start the fight using this cmd `python YysHelper -c 10` which means the explonation of chapter 10.  
+
+
+6. Enjoy it!
 
 [1]: https://github.com/mzlogin/awesome-adb#%E8%AE%BE%E5%A4%87%E8%BF%9E%E6%8E%A5%E7%AE%A1%E7%90%86
+[2]: https://github.com/NetEaseGame/AutomatorX
